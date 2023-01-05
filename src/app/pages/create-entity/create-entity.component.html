@@ -1,0 +1,22 @@
+<ng-container *ngIf="storeList$ | async as storeList">
+  <form [formGroup]="form" *ngIf="storeList?.length > 0; else emptyState">
+    <div>
+      <label>Store</label>
+      <select formControlName="store">
+        <option *ngFor="let store of storeList" [value]="store">
+          {{ store }}
+        </option>
+      </select>
+    </div>
+
+    <div>
+      <label> Title </label>
+      <input type="text" formControlName="title" [class.invalid]="form.invalid && form.controls.title.touched" />
+      <button (click)="submit()">Create</button>
+    </div>
+  </form>
+
+  <ng-template #emptyState>
+    <p>Create a store first!</p>
+  </ng-template>
+</ng-container>

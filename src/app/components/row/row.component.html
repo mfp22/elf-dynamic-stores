@@ -1,0 +1,10 @@
+<ng-container *ngIf="entities$ | async as entities">
+  <ng-container *ngIf="entities?.length > 0">
+    <div class="row" *ngFor="let entity of entities">
+      <div>id: {{ entity.id }}</div>
+      <div>title: {{ entity.title }}</div>
+      <button disabled style="cursor: not-allowed">edit</button>
+      <button (click)="deleteEntity(entity.id)">delete</button>
+    </div>
+  </ng-container>
+</ng-container>

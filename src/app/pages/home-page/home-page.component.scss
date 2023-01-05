@@ -1,0 +1,6 @@
+ul {
+  padding: 20px;
+}
+li:not(:first-of-type) {
+  padding-top: 10px;
+}

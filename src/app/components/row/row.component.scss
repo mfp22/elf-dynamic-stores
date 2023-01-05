@@ -1,0 +1,7 @@
+.row {
+  display: flex;
+  gap: 16px;
+}
+.row:not(:first-of-type) {
+  padding-top: 4px;
+}

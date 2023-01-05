@@ -1,0 +1,10 @@
+<p>stores:</p>
+
+<ng-container *ngIf="stores$ | async as stores">
+  <ul *ngIf="stores?.length > 0">
+    <li *ngFor="let store of stores">
+      <p>{{ store }}</p>
+      <app-row [store]="store"></app-row>
+    </li>
+  </ul>
+</ng-container>

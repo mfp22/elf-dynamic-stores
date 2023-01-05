@@ -18,6 +18,9 @@
     "@angular/platform-browser": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@angular/router": "^14.2.0",
+    "@ngneat/elf": "^2.3.0",
+    "@ngneat/elf-entities": "^4.4.3",
+    "@ngneat/elf-persist-state": "^1.1.6",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"

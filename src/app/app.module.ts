@@ -1,18 +1,23 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { HomePageComponent } from './pages/home-page/home-page.component';
+import { CreateStoreComponent } from './pages/create-store/create-store.component';
+import { AppRoutingModule } from './app-routing.module';
+import { CreateEntityComponent } from './pages/create-entity/create-entity.component';
+import { RowComponent } from './components/row/row.component';
 
 @NgModule({
+  imports: [BrowserModule, AppRoutingModule, FormsModule, ReactiveFormsModule],
   declarations: [
-    AppComponent
+    AppComponent,
+    HomePageComponent,
+    CreateStoreComponent,
+    CreateEntityComponent,
+    RowComponent,
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
