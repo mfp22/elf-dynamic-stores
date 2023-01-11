@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { StoreManagementRepository } from 'src/app/state/stores-management.repository';
 
 @Component({
@@ -8,7 +7,7 @@ import { StoreManagementRepository } from 'src/app/state/stores-management.repos
   templateUrl: './create-entity.component.html',
   styleUrls: ['./create-entity.component.scss'],
 })
-export class CreateEntityComponent implements OnInit {
+export class CreateEntityComponent {
   form = new FormGroup({
     store: new FormControl('', [Validators.required]),
     title: new FormControl('', {
@@ -16,28 +15,9 @@ export class CreateEntityComponent implements OnInit {
     }),
   });
 
-  storeList$: Observable<string[]>;
+  storeList$ = this.storeManagementRepository.registry.ids$;
+
+  createEntity$ = this.storeManagementRepository.createEntity$;
 
   constructor(private storeManagementRepository: StoreManagementRepository) {}
-
-  ngOnInit() {
-    this.storeList$ = this.storeManagementRepository.registry$;
-  }
-
-  submit() {
-    if (this.form.invalid) {
-      return;
-    }
-
-    const { value } = this.form;
-
-    const entity = {
-      title: value.title,
-      id: Date.now(),
-    };
-
-    this.storeManagementRepository.upsertToStore(value.store, entity);
-
-    this.form.reset();
-  }
 }

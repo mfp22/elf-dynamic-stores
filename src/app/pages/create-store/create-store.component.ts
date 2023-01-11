@@ -14,17 +14,9 @@ export class CreateStoreComponent implements OnInit {
     }),
   });
 
+  createStore$ = this.storeManagementRepository.createStore$;
+
   constructor(private storeManagementRepository: StoreManagementRepository) {}
 
   ngOnInit() {}
-
-  submit() {
-    if (this.form.invalid) {
-      return;
-    }
-
-    this.storeManagementRepository.createStore(this.form.value.title);
-
-    this.form.reset();
-  }
 }

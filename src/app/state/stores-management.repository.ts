@@ -1,63 +1,68 @@
-import { Injectable } from '@angular/core';
-import { createStore } from '@ngneat/elf';
-import { deleteEntities, getAllEntities, upsertEntities, withEntities } from '@ngneat/elf-entities';
-import { selectAllEntities } from '@ngneat/elf-entities';
-import { localStorageStrategy, persistState } from '@ngneat/elf-persist-state';
-import { map } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { adapt } from '@state-adapt/angular';
+import { createEntityAdapter, createEntityState, EntityState } from '@state-adapt/core/adapters';
+import { Adapt, toSource } from '@state-adapt/rxjs';
+import { filter, map, Subject } from 'rxjs';
+import { mapEachWithEffect } from '../map-each-with-effect.function';
 
-const registry = createStore({ name: 'registry' }, withEntities<{ id: string }>());
+type RegistryStore = { id: string };
+const registryAdapter = createEntityAdapter<RegistryStore>()({});
 
-const stores = {};
-
-export const persist = [
-  persistState(registry, {
-    key: 'registry',
-    storage: localStorageStrategy,
-  }),
-];
+type Entity = { id: number; title: string };
+const storeAdapter = createEntityAdapter<Entity>()({});
 
 @Injectable({ providedIn: 'root' })
 export class StoreManagementRepository {
-  registry$ = registry.pipe(
-    selectAllEntities(),
-    map((entities) => entities.map((entity) => entity.id))
+  adapt = inject(Adapt);
+
+  createStore$ = new Subject<[string, boolean]>();
+  createStoreValid$ = this.createStore$.pipe(
+    filter(([, valid]) => valid),
+    map(([value]) => ({ id: value })),
+    toSource('createStore$')
   );
 
-  constructor() {
-    const names = this.getStoresNames();
+  defaultInitialState = createEntityState<RegistryStore>();
+  initialRegistryState = (JSON.parse(localStorage.getItem('registry')) ||
+    this.defaultInitialState) as EntityState<RegistryStore>;
 
-    if (names?.length > 0) {
-      names.forEach((name) => {
-        this.createStore(name);
-      });
-    }
-  }
+  registry = adapt(['registry', this.initialRegistryState, registryAdapter], {
+    addOne: this.createStoreValid$,
+  });
+  sub = this.registry.state$.subscribe((state) => localStorage.setItem('registry', JSON.stringify(state)));
 
-  createStore(name: string) {
-    stores[name] = createStore({ name }, withEntities<any>());
-    persist.push(
-      persistState(stores[name], {
-        key: name,
-        storage: localStorageStrategy,
-      })
+  createEntity$ = new Subject<[{ store?: string; title?: string }, boolean]>();
+  createEntityValid$ = this.createEntity$.pipe(
+    filter(([, valid]) => valid),
+    map(([value]) => ({
+      ...value,
+      entity: {
+        title: value.title,
+        id: Date.now(),
+      },
+    }))
+  );
+
+  stores$ = mapEachWithEffect(this.registry.ids$, (id) => {
+    const createEntityForThisStore$ = this.createEntityValid$.pipe(
+      filter(({ store }) => store === id),
+      map(({ entity }) => entity),
+      toSource('createEntity$')
     );
 
-    registry.update(upsertEntities({ id: name }));
-  }
+    const defaultInitialState = createEntityState<Entity>();
+    const initialState = (JSON.parse(localStorage.getItem(id)) || defaultInitialState) as EntityState<Entity>;
+    const store = this.adapt.init([id, initialState, storeAdapter], {
+      upsertOne: createEntityForThisStore$,
+    });
 
-  deleteFromStore(store: string, entities: any) {
-    stores[store].update(deleteEntities(entities));
-  }
+    const sub = store.state$.subscribe((state) => localStorage.setItem(id, JSON.stringify(state)));
+    const destroy = () => {
+      localStorage.removeItem(id);
+      sub.unsubscribe();
+    };
+    return [{ id, store }, destroy];
+  });
 
-  getStoresNames() {
-    return registry.getValue().ids;
-  }
-
-  selectAll(store: string) {
-    return stores[store].pipe(selectAllEntities());
-  }
-
-  upsertToStore(store: string, data: any) {
-    stores[store].update(upsertEntities(data));
-  }
+  storesSub = this.stores$.subscribe();
 }

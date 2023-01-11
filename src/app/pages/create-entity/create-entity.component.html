@@ -12,7 +12,7 @@
     <div>
       <label> Title </label>
       <input type="text" formControlName="title" [class.invalid]="form.invalid && form.controls.title.touched" />
-      <button (click)="submit()">Create</button>
+      <button (click)="createEntity$.next([form.value, !form.invalid]); form.reset()">Create</button>
     </div>
   </form>
 

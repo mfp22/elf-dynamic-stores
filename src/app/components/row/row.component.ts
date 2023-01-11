@@ -2,29 +2,18 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Observable } from 'rxjs';
 import { StoreManagementRepository } from '../../state/stores-management.repository';
 
+type InObservable<T> = T extends Observable<infer U> ? U : never;
+
 @Component({
   selector: 'app-row',
   templateUrl: './row.component.html',
   styleUrls: ['./row.component.scss'],
 })
 export class RowComponent implements OnInit {
-  entities$: Observable<any>;
+  @Input() store: InObservable<StoreManagementRepository['stores$']>[0] | null = null;
+  entities$: InObservable<StoreManagementRepository['stores$']>[0]['store']['all$'] | null = null;
 
-  private _store: string;
-
-  @Input() get store(): string {
-    return this._store;
-  }
-  set store(store: string) {
-    this._store = store;
-    this.entities$ = this.storesManagementRepository.selectAll(store);
-  }
-
-  constructor(private storesManagementRepository: StoreManagementRepository) {}
-
-  ngOnInit() {}
-
-  deleteEntity(id: string | number) {
-    this.storesManagementRepository.deleteFromStore(this.store, id);
+  ngOnInit() {
+    this.entities$ = this.store?.store.all$;
   }
 }

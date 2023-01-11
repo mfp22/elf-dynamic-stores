@@ -1,5 +1,5 @@
 <form [formGroup]="form">
   <label> Title </label>
   <input type="text" formControlName="title" [class.invalid]="form.invalid && form.controls.title.touched" />
-  <button (click)="submit()">Create</button>
+  <button (click)="createStore$.next([form.value.title, form.valid]); form.reset()">Create</button>
 </form>
